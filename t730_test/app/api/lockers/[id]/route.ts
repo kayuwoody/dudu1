@@ -102,29 +102,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           occupied: sensors.occupied ?? false,
           tempOk: sensors.tempOk ?? true,
           safetyOk: sensors.safetyOk ?? true,
-          motorFault: sensors.motorFault ?? false,      if (data.success && data.lockers && data.lockers[lockerIndex]) {
-      const locker = data.lockers[lockerIndex];
-      return NextResponse.json({
-        success: true,
-        compartment: {
-          id,
-          columnId,
-          lockerIndex,
-          status: locker.state?.toLowerCase() || 'unknown',
-        },
-        sensors: {
-          doorClosed: locker.hallClosed,
-          doorOpen: locker.hallOpen,
-          irBeamClear: locker.irClear,
-          occupied: locker.occupied,
-          tempOk: locker.tempOk,
-          safetyOk: locker.safetyOk,
-          motorFault: locker.motorFault,
-        },
+          motorFault: sensors.motorFault ?? false,
           online: true,
         });
       }
-    } catch (err) {
+    } catch (error) {
       console.log(`[Locker] ESP32 unreachable, returning cached/default`);
     }
     
