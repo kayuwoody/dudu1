@@ -5,15 +5,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-// Default ESP32 address for prototype
-const DEFAULT_ESP32_IP = '192.168.1.10';
+// Default ESP32 address for prototype (192.168.150.x network)
+const DEFAULT_ESP32_IP = '192.168.150.3';
 const DEFAULT_ESP32_PORT = 80;
 
 // Column registry - updated by announce endpoint
-const columnRegistry = new Map<string, { 
+const columnRegistry = new Map<string, {
   id: string;
-  ip: string; 
-  port: number; 
+  ip: string;
+  port: number;
   lockerCount: number;
   lastSeen: string;
   isOnline: boolean;
@@ -25,7 +25,7 @@ if (columnRegistry.size === 0) {
     id: 'COL-001',
     ip: DEFAULT_ESP32_IP,
     port: DEFAULT_ESP32_PORT,
-    lockerCount: 8,  // Default to 8 lockers
+    lockerCount: 3,  // Match actual hardware
     lastSeen: new Date().toISOString(),
     isOnline: true,
   });
@@ -56,24 +56,29 @@ export async function GET(request: NextRequest) {
         });
         const data = await response.json();
         
-        if (data.success && data.lockers) {
+        // ESP32 returns { columnId, lockers: [...] } without a success field
+        if (data.lockers) {
           isOnline = true;
           column.lastSeen = new Date().toISOString();
           column.isOnline = true;
-          
-          compartments = data.lockers.map((locker: any, index: number) => ({
-            id: `${columnId}-${index}`,
-            columnId,
-            lockerIndex: index,
-            status: mapLockerState(locker.state),
-            sensors: {
-              doorClosed: locker.hallClosed,
-              doorOpen: locker.hallOpen,
-              irBeamClear: locker.irClear,
-              occupied: locker.occupied,
-            },
-            online: true,
-          }));
+
+          // Sensors are nested under locker.sensors in ESP32 response
+          compartments = data.lockers.map((locker: any, index: number) => {
+            const sensors = locker.sensors || {};
+            return {
+              id: `${columnId}-${index}`,
+              columnId,
+              lockerIndex: index,
+              status: mapLockerState(locker.state),
+              sensors: {
+                doorClosed: sensors.doorClosed ?? false,
+                doorOpen: sensors.doorOpen ?? false,
+                irBeamClear: sensors.irBeamClear ?? true,
+                occupied: sensors.occupied ?? false,
+              },
+              online: true,
+            };
+          });
         }
       } catch (err) {
         console.log(`[Lockers] ESP32 ${columnId} unreachable`);

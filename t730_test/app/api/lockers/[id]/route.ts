@@ -5,8 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-// Default ESP32 address for prototype
-const DEFAULT_ESP32_IP = '192.168.1.10';
+// Default ESP32 address for prototype (192.168.150.x network)
+const DEFAULT_ESP32_IP = '192.168.150.3';
 const DEFAULT_ESP32_PORT = 80;
 
 // Column registry - populated by announce endpoint
@@ -82,8 +82,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       });
       const data = await response.json();
       
-      if (data.success && data.lockers && data.lockers[lockerIndex]) {
+      // ESP32 returns { columnId, lockers: [...] } without a success field
+      if (data.lockers && data.lockers[lockerIndex]) {
         const locker = data.lockers[lockerIndex];
+        // Sensors are nested under locker.sensors in ESP32 response
+        const sensors = locker.sensors || {};
         return NextResponse.json({
           success: true,
           compartment: {
@@ -93,13 +96,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             status: locker.state?.toLowerCase() || 'unknown',
           },
           sensors: {
-            doorClosed: locker.hallClosed,
-            doorOpen: locker.hallOpen,
-            irBeamClear: locker.irClear,
-            occupied: locker.occupied,
-            tempOk: locker.tempOk,
-            safetyOk: locker.safetyOk,
-            motorFault: locker.motorFault,
+            doorClosed: sensors.doorClosed ?? false,
+            doorOpen: sensors.doorOpen ?? false,
+            irBeamClear: sensors.irBeamClear ?? true,
+            occupied: sensors.occupied ?? false,
+            tempOk: sensors.tempOk ?? true,
+            safetyOk: sensors.safetyOk ?? true,
+            motorFault: sensors.motorFault ?? false,
           },
           online: true,
         });

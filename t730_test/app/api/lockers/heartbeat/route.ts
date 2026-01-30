@@ -19,10 +19,14 @@ export async function POST(request: NextRequest) {
     
     // Get IP from body (ESP32 sends it), fallback to headers
     const bodyIp = body.ip;
-    const headerIp = request.headers.get('x-forwarded-for')?.split(',')[0] 
+    const headerIp = request.headers.get('x-forwarded-for')?.split(',')[0]
       || request.headers.get('x-real-ip')
       || undefined;
-    const clientIp = bodyIp || headerIp;
+    // Strip ::ffff: prefix from IPv6-mapped IPv4 addresses
+    let clientIp = bodyIp || headerIp;
+    if (clientIp?.startsWith('::ffff:')) {
+      clientIp = clientIp.slice(7);
+    }
     
     await handleHeartbeat({
       columnId: body.columnId,
