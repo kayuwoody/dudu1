@@ -104,7 +104,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           safetyOk: sensors.safetyOk ?? true,
           motorFault: sensors.motorFault ?? false,
           online: true,
-        });
+        },});
       }
     } catch (error) {
       console.log(`[Locker] ESP32 unreachable, returning cached/default`);
