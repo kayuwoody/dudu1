@@ -287,7 +287,7 @@ export default function DiagnosticsPage() {
           gap: 10px;
           align-items: center;
           padding: 15px;
-          background: #f5f5f5;
+          background: #706d6d;
           border-radius: 8px;
           margin-bottom: 20px;
         }
@@ -316,8 +316,8 @@ export default function DiagnosticsPage() {
         }
         
         .btn-primary {
-          background: #007bff;
-          color: white;
+          background: #5a636e;
+          color: grey;
         }
         
         .btn-primary:hover {
@@ -368,7 +368,7 @@ export default function DiagnosticsPage() {
         }
         
         .panel {
-          background: white;
+          background: lightgrey;
           border: 1px solid #e0e0e0;
           border-radius: 8px;
           padding: 15px;
@@ -465,7 +465,7 @@ export default function DiagnosticsPage() {
           gap: 10px;
           margin-bottom: 20px;
           padding: 15px;
-          background: #f8f9fa;
+          background: #b5b0b0;
           border-radius: 4px;
         }
         
@@ -546,6 +546,7 @@ export default function DiagnosticsPage() {
           justify-content: space-between;
           font-size: 13px;
           color: #666;
+         background: rgba(255,255,255,0.03);
           margin-top: 10px;
         }
         
@@ -613,7 +614,7 @@ export default function DiagnosticsPage() {
           className="ip"
           value={esp32Ip}
           onChange={(e) => setEsp32Ip(e.target.value)}
-          placeholder="192.168.1.10"
+          placeholder="192.168.150.3"
         />
         <span>:</span>
         <input 
